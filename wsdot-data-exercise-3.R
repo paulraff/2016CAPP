@@ -1,3 +1,4 @@
+# Packages required for this exercise
 install.packages("lubridate")
 library(lubridate)
 
@@ -77,7 +78,21 @@ colnames(df.userdata) <- c("User", "StartDate", "EndDate")
 # Now, let's make some user-level historical data
 users <- sapply(1:100, function(x) {return(paste("user", x, sep = ""))})
 users.extra <- sapply(1:10, function(x) {return(paste("user", x, sep = ""))})
-treatments <- sapply(1:110, function(x) {return(sample(c("Treatment, Control"), 1))})
+treatments <- sapply(1:110, function(x) {return(sample(c("Treatment", "Control"), 1))})
 df.flightinfo <- data.frame(c(users, users.extra), treatments)
 colnames(df.flightinfo) <- c("User", "Flight")
 
+# We now have three different data frames that we want to combine into one.
+# Specification is that we have at least three columns: USER_ID, TREATMENT, DATE
+# We also want to add a SEGMENT_UserAge segment
+# Here's a proposed way to do it:
+# Step 1: combine event data with the age data to get the segment
+df.actions.with.userdata <- merge(df.actions, df.userdata, by.x = "Userid", by.y = "User", all.x = TRUE, all.y = FALSE)
+
+# Step 2: Combine this new data with flight info to get flight assignment
+df.actions.with.userdata.and.flightinfo <- merge(df.actions.with.userdata, df.flightinfo, by.x = "Userid", by.y = "User")
+
+# Rename columns
+colnames(df.actions.with.userdata.and.flightinfo) <- c("USER_ID", "Event", "DATE", "SEGMENT_UserAge", "EndDate", "TREATMENT")
+
+# Anything interesting about this data?
